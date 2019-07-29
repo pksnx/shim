@@ -1,0 +1,13 @@
+# build help
+# On dev vm
+docker pull centos:7
+docker run --rm -it -v /home/piyush.mittal/repo/shim:/shim centos:7 /bin/bash
+# In the container
+yum  -y groupinstall "Development tools"
+yum -y install gnu-efi-devel
+mkdir /shim/build
+cd /shim/build
+make TOPDIR=..  VENDOR_CERT_FILE=../Nutanix_Kernel_Signing_Key.crt -f ../Makefile
+exit
+
+
