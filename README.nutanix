@@ -1,4 +1,10 @@
-# build help
+# Build help
+
+  Get the "Kernel_Signing_Key.crt" from Security team which is in PEM format.
+  Then convert to DER format ("Kernel_Signing_Key.der") using below command on dev VM:
+
+   $ openssl x509 -outform der -in Kernel_Signing_Key.crt -out Kernel_Signing_Key.der
+
 # On dev vm
 docker pull centos:7
 docker run --rm -it -v ${PWD}:/shim centos:7 /bin/bash
@@ -7,7 +13,7 @@ yum  -y groupinstall "Development tools"
 yum -y install gnu-efi-devel
 mkdir /shim/build
 cd /shim/build
-make TOPDIR=..  VENDOR_CERT_FILE=../Kernel_Signing_Key.cer -f ../Makefile
+make TOPDIR=..  VENDOR_CERT_FILE=../Kernel_Signing_Key.der -f ../Makefile
 exit
 
 
