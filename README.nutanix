@@ -1,9 +1,17 @@
 # Build help
 
-  Get the "Kernel_Signing_Key.crt" from Security team which is in PEM format.
-  Then convert to DER format ("Kernel_Signing_Key.der") using below command on dev VM:
+# There are 2 keys used when building Shim
+# 1. Certificate with name "Nutanix Secure Boot Key"
+#     - Used to sign shim binaries itself, so it can be trusted by UEFI
+# 2. Certificate with name "Nutanix Kernel Signing Key"
+#     - Embedded within shim and passed via VENDOR_CERT_FILE make argument, see below
+#     - Shim uses this to verify grub2 during secure boot. 
 
-   $ openssl x509 -outform der -in Kernel_Signing_Key.crt -out Kernel_Signing_Key.der
+# 1. Embed the signing key
+Get the "Kernel_Signing_Key.crt" from Security team which is in PEM format.
+Then convert to DER format ("Kernel_Signing_Key.cer") using below command on dev VM:
+
+   $ openssl x509 -outform der -in Kernel_Signing_Key.crt -out Kernel_Signing_Key.cer
 
 # On dev vm
 docker pull centos:7
@@ -13,7 +21,14 @@ yum  -y groupinstall "Development tools"
 yum -y install gnu-efi-devel
 mkdir /shim/build
 cd /shim/build
-make TOPDIR=..  VENDOR_CERT_FILE=../Kernel_Signing_Key.der -f ../Makefile
+make TOPDIR=..  VENDOR_CERT_FILE=../Kernel_Signing_Key.cer -f ../Makefile
 exit
 
+
+# 2. Signing the shim binaries
+# This is done via "pesgin" on dev VM, for example:
+#   $ pesign -n ./nutanix_secure_boot_db -i shimx64.efi -o shimx64-signed.efi -c "Nutanix (Test) Secure Boot Key - Nutanix" -s
+#     The nutanix_secure_boot_db is development/test key DB above.
+# For release builds: similar step(s) above are done using production keys DB via jenkins build (toolbox.git)
+#
 
